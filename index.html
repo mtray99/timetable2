@@ -58,8 +58,13 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 .range-group .val { min-width: 36px; text-align: center; font-weight: 700; color: #667eea; font-size: 16px; }
 
 /* 태그 입력 */
-.tag-input-wrap { display: flex; gap: 6px; flex-wrap: wrap; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 8px; min-height: 38px; align-items: center; }
+.tag-input-wrap { display: flex; gap: 6px; flex-wrap: wrap; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 8px; min-height: 38px; align-items: center; position: relative; }
 .tag-input-wrap input { border: none; outline: none; font-size: 13px; flex: 1; min-width: 80px; }
+.autocomplete-box { position: relative; width: 100%; }
+.autocomplete-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); background: white; border: 1px solid #d0d5dd; border-radius: 12px; box-shadow: 0 12px 24px rgba(0,0,0,0.12); max-height: 250px; overflow-y: auto; }
+.autocomplete-item { padding: 10px 14px; cursor: pointer; color: #1a1a2e; font-size: 13px; }
+.autocomplete-item:hover, .autocomplete-item.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.autocomplete-item + .autocomplete-item { border-top: 1px solid #eef2ff; }
 .tag { background: #eef2ff; color: #667eea; font-size: 12px; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
 .tag .remove { cursor: pointer; font-size: 14px; opacity: 0.6; }
 .tag .remove:hover { opacity: 1; }
@@ -215,7 +220,10 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
     <div class="form-section">
         <label>🚫 기피 교수</label>
         <div class="tag-input-wrap" id="avoidedWrap">
-            <input type="text" id="avoidedInput" placeholder="교수명 입력...">
+            <div class="autocomplete-box">
+                <input type="text" id="avoidedInput" placeholder="교수명 입력...">
+                <div class="autocomplete-list" id="professorsListAvoided"></div>
+            </div>
         </div>
     </div>
 
@@ -223,8 +231,14 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
     <div class="form-section">
         <label>❤️ 선호 교수</label>
         <div class="tag-input-wrap" id="preferredWrap">
-            <input type="text" id="preferredInput" placeholder="교수명 입력...">
+            <div class="autocomplete-box">
+                <input type="text" id="preferredInput" placeholder="교수명 입력...">
+                <div class="autocomplete-list" id="professorsListPreferred"></div>
+            </div>
         </div>
+    </div>
+    <div class="form-section" style="margin-top:8px;">
+        <label style="font-size:13px;"><input type="checkbox" id="forcePreferred"> 선호 교수 필수 포함</label>
     </div>
 
     <button class="btn-generate" id="btnGenerate" onclick="generateTimetable()">
@@ -353,6 +367,88 @@ setupTagInput('requiredInput', 'requiredWrap');
 setupTagInput('avoidedInput', 'avoidedWrap');
 setupTagInput('preferredInput', 'preferredWrap');
 
+// 교수 목록 불러와 자동완성 리스트 채우기 (폴백: Live Server VS 백엔드 직접)
+async function loadProfessorList(){
+    const endpoints = [API + '/api/professors', 'http://127.0.0.1:8000/api/professors', 'http://localhost:8000/api/professors'];
+    window.ALL_PROFESSORS = [];
+    for (const ep of endpoints){
+        try{
+            const res = await fetch(ep, {cache: 'no-store'});
+            if (!res.ok) continue;
+            const data = await res.json();
+            window.ALL_PROFESSORS = (data.professors || []).slice();
+            filterAndPopulate(document.getElementById('preferredInput'), 'professorsListPreferred');
+            filterAndPopulate(document.getElementById('avoidedInput'), 'professorsListAvoided');
+            return;
+        }catch(e){
+            continue;
+        }
+    }
+}
+loadProfessorList();
+
+function createTagFromValue(wrapId, inputId, value){
+    const input = document.getElementById(inputId);
+    const wrap = document.getElementById(wrapId);
+    if(!value || !value.trim()) return;
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `${value.trim()}<span class="remove" onclick="this.parentElement.remove()">×</span>`;
+    wrap.insertBefore(tag, input);
+    input.value = '';
+    filterAndPopulate(input, wrapId === 'preferredWrap' ? 'professorsListPreferred' : 'professorsListAvoided');
+}
+
+function populateAutocomplete(listId, items, wrapId, inputId){
+    const dl = document.getElementById(listId);
+    if(!dl) return;
+    dl.innerHTML = '';
+    if(!items.length){
+        dl.style.display = 'none';
+        return;
+    }
+    items.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.textContent = p;
+        item.addEventListener('mousedown', function(e){
+            e.preventDefault();
+            createTagFromValue(wrapId, inputId, p);
+            dl.style.display = 'none';
+        });
+        dl.appendChild(item);
+    });
+    dl.style.display = 'block';
+}
+
+function filterAndPopulate(inputElem, listId){
+    const q = (inputElem.value || '').trim().toLowerCase();
+    if(!window.ALL_PROFESSORS) return;
+    const values = q === ''
+        ? window.ALL_PROFESSORS.slice(0,200)
+        : window.ALL_PROFESSORS.filter(p => p.toLowerCase().includes(q)).slice(0,200);
+    const wrapId = inputElem.id === 'preferredInput' ? 'preferredWrap' : 'avoidedWrap';
+    populateAutocomplete(listId, values, wrapId, inputElem.id);
+}
+
+const preferredInput = document.getElementById('preferredInput');
+const avoidedInput = document.getElementById('avoidedInput');
+
+preferredInput.addEventListener('input', function(e){ filterAndPopulate(e.target, 'professorsListPreferred'); });
+avoidedInput.addEventListener('input', function(e){ filterAndPopulate(e.target, 'professorsListAvoided'); });
+
+preferredInput.addEventListener('focus', function(e){ filterAndPopulate(e.target, 'professorsListPreferred'); });
+avoidedInput.addEventListener('focus', function(e){ filterAndPopulate(e.target, 'professorsListAvoided'); });
+
+preferredInput.addEventListener('click', function(e){ filterAndPopulate(e.target, 'professorsListPreferred'); });
+avoidedInput.addEventListener('click', function(e){ filterAndPopulate(e.target, 'professorsListAvoided'); });
+
+document.addEventListener('click', function(e){
+    if (!e.target.closest('.autocomplete-box')){
+        document.querySelectorAll('.autocomplete-list').forEach(dl => dl.style.display = 'none');
+    }
+});
+
 function getTags(wrapId) {
     return [...document.querySelectorAll(`#${wrapId} .tag`)].map(t => t.textContent.replace('×', '').trim());
 }
@@ -375,6 +471,7 @@ async function generateTimetable() {
         morning_cutoff: cutoff + ':00',
         lunch_break: document.getElementById('chkLunch').checked,
         preferred_profs: getTags('preferredWrap'),
+        force_preferred: document.getElementById('forcePreferred').checked,
         avoided_profs: getTags('avoidedWrap'),
         timeout: 10,
         max_results: 5,
