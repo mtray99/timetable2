@@ -57,6 +57,29 @@ def check_constraints(schedule, constraints):
     return True
 
 
+def normalize_professor_names(professor_text):
+    parts = []
+    for line in str(professor_text).splitlines():
+        for part in line.replace('/', ',').split(','):
+            part = part.strip().lower()
+            if part:
+                parts.append(part)
+    return parts
+
+
+def professor_matches(lec, name_set):
+    if not name_set:
+        return False
+    lec_names = normalize_professor_names(lec.get('professor', ''))
+    for name in name_set:
+        normalized = name.strip().lower()
+        if not normalized:
+            continue
+        if any(normalized == ln or normalized in ln for ln in lec_names):
+            return True
+    return False
+
+
 def score_schedule(schedule, constraints):
     score = 0
     all_slots = []
@@ -91,9 +114,9 @@ def score_schedule(schedule, constraints):
     score += max(0, 15 - morning_count * 5)
 
     # 선호 교수 보너스
-    for lec in schedule:
-        if lec.get('professor', '') in constraints.get('preferred_profs', []):
-            score += 5
+    preferred_set = set(p.strip() for p in constraints.get('preferred_profs', []) if p.strip())
+    preferred_count = sum(1 for lec in schedule if professor_matches(lec, preferred_set))
+    score += preferred_count * 10
 
     # 수업 시간 균등 분배 (최대 10점)
     if days_with_class:
@@ -128,6 +151,9 @@ def solve_timetable(course_groups, constraints, max_results=5):
     Returns:
         [{ 'lectures': [...], 'total_credits': float, 'score': float }, ...]
     """
+    preferred_set = set(p.strip() for p in constraints.get('preferred_profs', []) if p.strip())
+    avoided_set = set(p.strip() for p in constraints.get('avoided_profs', []) if p.strip())
+
     # 1단계: 그룹 단위 필터링
     filtered_groups = []
     for group in course_groups:
@@ -140,7 +166,7 @@ def solve_timetable(course_groups, constraints, max_results=5):
             if constraints.get('free_days'):
                 if any(s['day'] in constraints['free_days'] for s in l['time_slots']):
                     continue
-            if l.get('professor', '') in constraints.get('avoided_profs', []):
+            if professor_matches(l, avoided_set):
                 continue
             filtered_lectures.append(l)
         if not filtered_lectures:
@@ -184,6 +210,14 @@ def solve_timetable(course_groups, constraints, max_results=5):
             backtrack(chosen + [lec], group_idx + 1, nc)
 
     backtrack([], 0, 0)
+
+    def has_preferred(schedule):
+        return any(professor_matches(l, preferred_set) for l in schedule['lectures'])
+
+    preferred_results = [r for r in results if has_preferred(r)]
+    if preferred_set and preferred_results:
+        preferred_results.sort(key=lambda x: x['score'], reverse=True)
+        return preferred_results[:max_results]
 
     results.sort(key=lambda x: x['score'], reverse=True)
     return results[:max_results]
