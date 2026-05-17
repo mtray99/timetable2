@@ -33,6 +33,7 @@ class SolveRequest(BaseModel):
     morning_cutoff: str = "10:00"
     lunch_break: bool = False
     preferred_profs: list[str] = []
+    force_preferred: bool = False
     avoided_profs: list[str] = []
     timeout: int = 10
     max_results: int = 5
@@ -109,6 +110,7 @@ async def solve(req: SolveRequest):
         "max_credits": 21,
         "target_credits": 18,
         "preferred_profs": req.preferred_profs,
+        "force_preferred": req.force_preferred,
         "avoided_profs": req.avoided_profs,
         "timeout": req.timeout,
     }
@@ -124,6 +126,23 @@ async def serve_frontend():
         with open(html_path, "r", encoding="utf-8") as f:
             return f.read()
     return "<h1>index.html not found</h1>"
+
+
+@app.get("/api/professors")
+async def get_professors():
+    internal = load_internal_data()
+    profs = set()
+    for l in internal.get('lectures', []):
+        p = l.get('professor')
+        if p:
+            # split common delimiters
+            for line in str(p).splitlines():
+                for part in line.replace('/', ',').split(','):
+                    part = part.strip()
+                    if part:
+                        profs.add(part)
+    prof_list = sorted(profs)
+    return {"professors": prof_list}
 
 if __name__ == "__main__":
     import uvicorn
