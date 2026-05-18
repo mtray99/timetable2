@@ -65,9 +65,12 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 .autocomplete-item { padding: 10px 14px; cursor: pointer; color: #1a1a2e; font-size: 13px; }
 .autocomplete-item:hover, .autocomplete-item.active { background: linear-gradient(135deg, #4DAAAA 0%, #5DB5B2 100%); color: white; }
 .autocomplete-item + .autocomplete-item { border-top: 1px solid #eef2ff; }
-.tag { background: #e6f7ff; color: #4DAAAA; font-size: 12px; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
-.tag .remove { cursor: pointer; font-size: 14px; opacity: 0.6; }
+.tag { background: #ffffff; color: #0f4f58; font-size: 12px; padding: 5px 10px; border-radius: 999px; border: 1px solid #4DAAAA; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; margin: 3px 2px; }
+.tag .remove { cursor: pointer; font-size: 13px; opacity: 0.75; }
 .tag .remove:hover { opacity: 1; }
+.tag-input-wrap { display: flex; gap: 6px; flex-wrap: wrap; border: 1px solid #d0d5dd; border-radius: 8px; padding: 6px 8px; min-height: 42px; align-items: center; position: relative; }
+.tag-input-wrap:focus-within { border-color: #4DAAAA; box-shadow: 0 0 0 3px rgba(77,170,170,0.15); }
+.tag-input-wrap input { border: none; outline: none; font-size: 13px; flex: 1; min-width: 80px; }
 
 /* 셀렉트 드롭다운 */
 .multi-select { max-height: 120px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px; }
@@ -275,6 +278,8 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 const API = '';
 let curriculumData = null;
 let selectedCourses = [];
+let preferredProfs = [];
+let avoidedProfs = [];
 let solveResults = [];
 let currentResultIdx = 0;
 
@@ -355,11 +360,15 @@ function setupTagInput(inputId, wrapId) {
     input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && this.value.trim()) {
             e.preventDefault();
-            const tag = document.createElement('span');
-            tag.className = 'tag';
-            tag.innerHTML = `${this.value.trim()}<span class="remove" onclick="this.parentElement.remove()">×</span>`;
-            wrap.insertBefore(tag, this);
-            this.value = '';
+            createTagFromValue(wrapId, inputId, this.value.trim());
+        }
+    });
+    wrap.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove')) {
+            const tag = e.target.parentElement;
+            const value = tag.textContent.replace('×', '').trim();
+            tag.remove();
+            removeProfessorFromList(wrapId, value);
         }
     });
 }
@@ -391,27 +400,62 @@ function createTagFromValue(wrapId, inputId, value){
     const input = document.getElementById(inputId);
     const wrap = document.getElementById(wrapId);
     if(!value || !value.trim()) return;
+    const trimmed = value.trim();
+    if (wrapId === 'preferredWrap' && preferredProfs.includes(trimmed)) return;
+    if (wrapId === 'avoidedWrap' && avoidedProfs.includes(trimmed)) return;
+    if (preferredProfs.includes(trimmed) || avoidedProfs.includes(trimmed)) {
+        alert('이미 다른 목록에서 선택된 교수입니다.');
+        return;
+    }
+    if (wrapId === 'preferredWrap') preferredProfs.push(trimmed);
+    if (wrapId === 'avoidedWrap') avoidedProfs.push(trimmed);
+
     const tag = document.createElement('span');
     tag.className = 'tag';
-    tag.innerHTML = `${value.trim()}<span class="remove" onclick="this.parentElement.remove()">×</span>`;
-    wrap.insertBefore(tag, input);
+    tag.innerHTML = `${trimmed}<span class="remove">×</span>`;
+    const inputBox = input.closest('.autocomplete-box');
+    if (inputBox) {
+        wrap.insertBefore(tag, inputBox);
+    } else {
+        wrap.appendChild(tag);
+    }
     input.value = '';
-    filterAndPopulate(input, wrapId === 'preferredWrap' ? 'professorsListPreferred' : 'professorsListAvoided');
+    updateProfessorLists();
+}
+
+function removeProfessorFromList(wrapId, value) {
+    if (wrapId === 'preferredWrap') {
+        preferredProfs = preferredProfs.filter(v => v !== value);
+    } else if (wrapId === 'avoidedWrap') {
+        avoidedProfs = avoidedProfs.filter(v => v !== value);
+    }
+    updateProfessorLists();
+}
+
+function updateProfessorLists() {
+    if (document.activeElement === document.getElementById('preferredInput') || document.getElementById('preferredInput').value.trim()) {
+        filterAndPopulate(document.getElementById('preferredInput'), 'professorsListPreferred');
+    }
+    if (document.activeElement === document.getElementById('avoidedInput') || document.getElementById('avoidedInput').value.trim()) {
+        filterAndPopulate(document.getElementById('avoidedInput'), 'professorsListAvoided');
+    }
 }
 
 function populateAutocomplete(listId, items, wrapId, inputId){
     const dl = document.getElementById(listId);
     if(!dl) return;
     dl.innerHTML = '';
-    if(!items.length){
+    const selectedSet = wrapId === 'preferredWrap' ? new Set(preferredProfs) : new Set(avoidedProfs);
+    const filtered = items.filter(p => !selectedSet.has(p));
+    if(!filtered.length){
         dl.style.display = 'none';
         return;
     }
-    items.forEach(p => {
+    filtered.forEach(p => {
         const item = document.createElement('div');
         item.className = 'autocomplete-item';
         item.textContent = p;
-        item.addEventListener('mousedown', function(e){
+        item.addEventListener('click', function(e){
             e.preventDefault();
             createTagFromValue(wrapId, inputId, p);
             dl.style.display = 'none';
