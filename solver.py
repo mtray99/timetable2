@@ -215,6 +215,12 @@ def solve_timetable(course_groups, constraints, max_results=5):
         return any(professor_matches(l, preferred_set) for l in schedule['lectures'])
 
     preferred_results = [r for r in results if has_preferred(r)]
+    if constraints.get('force_preferred') and preferred_set:
+        if preferred_results:
+            preferred_results.sort(key=lambda x: x['score'], reverse=True)
+            return preferred_results[:max_results]
+        return []
+
     if preferred_set and preferred_results:
         preferred_results.sort(key=lambda x: x['score'], reverse=True)
         return preferred_results[:max_results]
