@@ -9,7 +9,7 @@
 body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
 
 /* 헤더 */
-.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px 32px; text-align: center; box-shadow: 0 4px 20px rgba(102,126,234,0.3); }
+.header { background: linear-gradient(135deg, #4DAAAA 0%, #5DB5B2 100%); color: white; padding: 24px 32px; text-align: center; box-shadow: 0 4px 20px rgba(77,170,170,0.3); }
 .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
 .header p { opacity: 0.85; font-size: 14px; }
 
@@ -24,7 +24,7 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 
 /* 업로드 영역 */
 .upload-zone { border: 2px dashed #d0d5dd; border-radius: 12px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; }
-.upload-zone:hover { border-color: #667eea; background: #f8f9ff; }
+.upload-zone:hover { border-color: #4DAAAA; background: #f0f9ff; }
 .upload-zone.active { border-color: #22c55e; background: #f0fdf4; }
 .upload-zone .emoji { font-size: 40px; margin-bottom: 8px; }
 .upload-zone p { color: #6b7280; font-size: 14px; }
@@ -32,8 +32,8 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 
 /* 업로드 결과 */
 .upload-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-.stat-box { background: #f8f9ff; border-radius: 8px; padding: 10px; text-align: center; }
-.stat-box .num { font-size: 24px; font-weight: 800; color: #667eea; }
+.stat-box { background: #f0f9ff; border-radius: 8px; padding: 10px; text-align: center; }
+.stat-box .num { font-size: 24px; font-weight: 800; color: #4DAAAA; }
 .stat-box .label { font-size: 11px; color: #6b7280; }
 
 /* 제약조건 폼 */
@@ -43,19 +43,19 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 
 /* 체크박스/토글 */
 .toggle-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
-.toggle-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; }
+.toggle-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #4DAAAA; cursor: pointer; }
 .toggle-row span { font-size: 14px; }
 
 /* 공강일 선택 */
 .day-selector { display: flex; gap: 6px; }
 .day-btn { width: 44px; height: 44px; border-radius: 10px; border: 2px solid #e5e7eb; background: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
-.day-btn.selected { background: #667eea; color: white; border-color: #667eea; transform: scale(1.05); }
-.day-btn:hover { border-color: #667eea; }
+.day-btn.selected { background: #4DAAAA; color: white; border-color: #4DAAAA; transform: scale(1.05); }
+.day-btn:hover { border-color: #4DAAAA; }
 
 /* 슬라이더 */
 .range-group { display: flex; gap: 12px; align-items: center; }
-.range-group input[type="range"] { flex: 1; accent-color: #667eea; }
-.range-group .val { min-width: 36px; text-align: center; font-weight: 700; color: #667eea; font-size: 16px; }
+.range-group input[type="range"] { flex: 1; accent-color: #4DAAAA; }
+.range-group .val { min-width: 36px; text-align: center; font-weight: 700; color: #4DAAAA; font-size: 16px; }
 
 /* 태그 입력 */
 .tag-input-wrap { display: flex; gap: 6px; flex-wrap: wrap; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 8px; min-height: 38px; align-items: center; position: relative; }
@@ -63,20 +63,20 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 .autocomplete-box { position: relative; width: 100%; }
 .autocomplete-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); background: white; border: 1px solid #d0d5dd; border-radius: 12px; box-shadow: 0 12px 24px rgba(0,0,0,0.12); max-height: 250px; overflow-y: auto; }
 .autocomplete-item { padding: 10px 14px; cursor: pointer; color: #1a1a2e; font-size: 13px; }
-.autocomplete-item:hover, .autocomplete-item.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.autocomplete-item:hover, .autocomplete-item.active { background: linear-gradient(135deg, #4DAAAA 0%, #5DB5B2 100%); color: white; }
 .autocomplete-item + .autocomplete-item { border-top: 1px solid #eef2ff; }
-.tag { background: #eef2ff; color: #667eea; font-size: 12px; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+.tag { background: #e6f7ff; color: #4DAAAA; font-size: 12px; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
 .tag .remove { cursor: pointer; font-size: 14px; opacity: 0.6; }
 .tag .remove:hover { opacity: 1; }
 
 /* 셀렉트 드롭다운 */
 .multi-select { max-height: 120px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px; }
 .multi-select label { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 13px; cursor: pointer; border-radius: 4px; }
-.multi-select label:hover { background: #f8f9ff; }
+.multi-select label:hover { background: #f0f9ff; }
 
 /* 생성 버튼 */
-.btn-generate { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
-.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102,126,234,0.4); }
+.btn-generate { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #4DAAAA 0%, #5DB5B2 100%); color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(77,170,170,0.4); }
 .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-generate .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -90,13 +90,13 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 /* 결과 탭 */
 .result-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .result-tab { padding: 8px 16px; border-radius: 8px; border: 2px solid #e5e7eb; background: white; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; }
-.result-tab.active { border-color: #667eea; background: #eef2ff; color: #667eea; }
-.result-tab:hover { border-color: #667eea; }
-.result-tab .score { color: #667eea; font-weight: 800; }
+.result-tab.active { border-color: #4DAAAA; background: #e6f7ff; color: #4DAAAA; }
+.result-tab:hover { border-color: #4DAAAA; }
+.result-tab .score { color: #4DAAAA; font-weight: 800; }
 
 /* 시간표 그리드 */
 .timetable { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.timetable th { background: #f8f9ff; padding: 10px 4px; font-size: 13px; font-weight: 700; color: #667eea; text-align: center; border-bottom: 2px solid #e5e7eb; }
+.timetable th { background: #f0f9ff; padding: 10px 4px; font-size: 13px; font-weight: 700; color: #4DAAAA; text-align: center; border-bottom: 2px solid #e5e7eb; }
 .timetable td { border: 1px solid #f0f0f0; height: 28px; vertical-align: top; position: relative; padding: 0; }
 .timetable .time-col { width: 56px; font-size: 11px; color: #9ca3af; text-align: center; padding: 4px; background: #fafbfc; font-weight: 600; }
 
@@ -118,8 +118,8 @@ body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; bac
 
 /* 결과 요약 */
 .result-summary { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-.summary-chip { background: #f8f9ff; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; }
-.summary-chip .val { color: #667eea; font-weight: 800; }
+.summary-chip { background: #f0f9ff; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; }
+.summary-chip .val { color: #4A9FD8; font-weight: 800; }
 
 /* 강의 리스트 */
 .lecture-list { margin-top: 16px; }
